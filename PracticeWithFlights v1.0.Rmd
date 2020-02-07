@@ -6,25 +6,87 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+install.packages("nycflights13")
+library(nycflights13)
+library(dplyr)
+library(knitr)
+library(ggplot2)
 ```
 
-## R Markdown
+## Introduction
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-summary(cars)
+Carrier_Year <- flights %>% 
+  group_by(carrier) %>% 
+  filter(year == 2013, month == 1, day == 12, origin == "EWR")
+  
+
+ggplot(Carrier_Year, aes(x = sched_arr_time, y = arr_delay, color = carrier)) + geom_point(alpha = 0.6, shape = 1)
 ```
 
-## Including Plots
+```{r}
+library("nycflights13")
 
-You can also embed plots, for example:
+EWRdelays <- flights %>% 
+  group_by(carrier) %>% 
+  filter(month == 1) %>% 
+  summarize(meanair_time = mean(air_time), meanarr_delay = mean(arr_delay))
+  
+summary(EWRdelays)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+ggplot(EWRdelays, aes(x = meanair_time, y = meanarr_delay, color = carrier)) + geom_point(alpha = 0.9, size = 5) + geom_smooth(method="lm")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+DeltaEWRtoSFO <- flights %>% 
+  filter(origin == "EWR", dest == "SFO") %>% 
+  arrange(carrier)
+  
+DeltaEWRtoSFO
+
+ggplot(DeltaEWRtoSFO, aes(arr_delay, color = carrier)) + geom_bar(position = "dodge", alpha = 0.2, binwidth = 15) + scale_x_continuous(limits=c(-100,200))
+
+
+
+```
+
+
+
+
+
+```{r}
+flights
+library(dplyr)
+
+AirportData <- flights %>% 
+  group_by(dest, origin) %>% 
+  summarize(medianARR = median(arr_delay))
+  
+  
+  
+summary(AirportData)
+
+ggplot(AirportData, aes(medianARR, 
+```
+
+
+
+```{r}
+alaska_flights <- flights %>% 
+  filter(carrier == "AS")
+
+ggplot(data = alaska_flights, mapping = aes(x = dep_delay, y = arr_delay)) + 
+  geom_jitter(alpha = 0.3, shape = 1, width = 30, height = 30)
+
+early_january_weather <- weather %>% 
+  filter(origin == "EWR" & month == 1 & day <= 15)
+
+early_january_weather
+
+ggplot(data = weather, mapping = aes(x = temp)) +
+  geom_histogram(color = "white", fill = "steelblue")
+```
+
+
